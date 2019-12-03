@@ -23,38 +23,29 @@ export interface INewsListWebPartProps {
 export default class NewsListWebPart extends BaseClientSideWebPart<INewsListWebPartProps> {
 
   public render(): void {
+    sp.setup({
+      spfxContext: this.context
+    });
+    const filter = "(PromotedState eq 2) and (FinalApproved eq 1) and (FSObjType eq 0)";
+    const orderField = "FirstPublishedDate";
+    const orderType = false;
+    let web;
     if(this.properties.global){
-      const filter = "(PromotedState eq 2) and (FinalApproved eq 1) and (FSObjType eq 0)";
-      const orderField = "FirstPublishedDate";
-      const orderType = false;
-      let web = new Web('https://qualysoftholding.sharepoint.com/sites/intranet');
-      web.lists.getByTitle("Site Pages").items.filter(filter).orderBy(orderField,orderType).get().then(p => {
-        const element: React.ReactElement<INewsListProps > = React.createElement(
-          NewsList,
-          {
-            title: this.properties.title,
-            global: this.properties.global,
-            newsList: p
-          }
-        );
-        ReactDom.render(element, this.domElement);
-      });
-    } else {
-      const filter = "(PromotedState eq 2) and (FinalApproved eq 1) and (FSObjType eq 0)";
-      const orderField = "FirstPublishedDate";
-      const orderType = false;
-      sp.web.lists.getByTitle("Site Pages").items.filter(filter).orderBy(orderField,orderType).get().then(p => {
-        const element: React.ReactElement<INewsListProps > = React.createElement(
-          NewsList,
-          {
-            title: this.properties.title,
-            global: this.properties.global,
-            newsList: p
-          }
-        );
-        ReactDom.render(element, this.domElement);
-      });
+      web = new Web('https://qualysoftholding.sharepoint.com/sites/intranet'); 
+    }else {
+      web = sp.web;
     }
+    web.lists.getByTitle("Site Pages").items.filter(filter).orderBy(orderField,orderType).get().then(p => {
+      const element: React.ReactElement<INewsListProps > = React.createElement(
+        NewsList,
+        {
+          title: this.properties.title,
+          global: this.properties.global,
+          newsList: p
+        }
+      );
+      ReactDom.render(element, this.domElement);
+    });
   }
 
   protected onDispose(): void {

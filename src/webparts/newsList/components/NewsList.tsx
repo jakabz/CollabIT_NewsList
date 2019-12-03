@@ -25,7 +25,7 @@ export default class NewsList extends React.Component<INewsListProps, INewsListS
   
   public constructor(props: INewsListProps, state: INewsListState) {
     super(props);
-    this.state = { isOpen: false, searchStr:'', actPage: 1, pageSize: 5 };
+    this.state = { isOpen: false, searchStr:'', actPage: 1, pageSize: 10 };
   }
 
   public openPane():void {
@@ -56,7 +56,7 @@ export default class NewsList extends React.Component<INewsListProps, INewsListS
           <div className={ styles.newsFeedImage } style={{backgroundImage: `url(${item.BannerImageUrl.Url})`}}></div>
         </Card.Item>
         <Card.Section>
-          <Text variant="small" styles={siteTextStyles} className={styles.title}>{key} {item.Title}</Text>
+          <Text variant="small" styles={siteTextStyles} className={styles.title}>{item.Title}</Text>
           <Text variant="small" styles={siteTextStyles} className={styles.date}>{new Date(item.FirstPublishedDate).toLocaleString('hu-HU')}</Text>
           <Text styles={descriptionTextStyles} className={styles.desc}>{item.Description}</Text>
         </Card.Section>
@@ -105,7 +105,7 @@ export default class NewsList extends React.Component<INewsListProps, INewsListS
     const sectionStackTokens: IStackTokens = { childrenGap: 20 };
     const cardTokens: ICardTokens = { childrenMargin: 12 };
     const footerCardSectionTokens: ICardSectionTokens = { padding: '0px 0px 0px 12px' };
-    console.info(this.props.newsList);
+    //console.info(this.props.newsList);
     return (
       <div className={ styles.newsList }>
         <div className={styles.wptitle}>
