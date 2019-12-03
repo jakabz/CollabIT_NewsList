@@ -4,61 +4,57 @@ import { Version } from '@microsoft/sp-core-library';
 import {
   BaseClientSideWebPart,
   IPropertyPaneConfiguration,
-  PropertyPaneTextField
+  PropertyPaneTextField,
+  PropertyPaneToggle
 } from '@microsoft/sp-webpart-base';
 
 import * as strings from 'NewsListWebPartStrings';
 import NewsList from './components/NewsList';
 import { INewsListProps } from './components/INewsListProps';
-import {
-  SPHttpClient,
-  SPHttpClientResponse
-} from '@microsoft/sp-http';
+import { sp, Web } from "@pnp/sp";
 
 export interface INewsListWebPartProps {
   title: string;
   newsList: any;
   global: boolean;
+  order: string;
 }
 
 export default class NewsListWebPart extends BaseClientSideWebPart<INewsListWebPartProps> {
 
-  private listResult;
-  private listInit = false;
-
   public render(): void {
-    
-    if(!this.listInit){
-      let query = '';
-      query += '$select=ID,Title,BannerImageUrl,Description,FileRef&';
-      query += '$filter=(PromotedState eq 2) and (FinalApproved eq 1) and (FSObjType eq 0)&';
-      query += '$orderby=FirstPublishedDate desc';
-      this._getListData(query,this.properties.global).then((response) => {
-        this.listResult = response.value;
-        this.listInit = true;
-        this.render();
+    if(this.properties.global){
+      const filter = "(PromotedState eq 2) and (FinalApproved eq 1) and (FSObjType eq 0)";
+      const orderField = "FirstPublishedDate";
+      const orderType = false;
+      let web = new Web('https://qualysoftholding.sharepoint.com/sites/intranet');
+      web.lists.getByTitle("Site Pages").items.filter(filter).orderBy(orderField,orderType).get().then(p => {
+        const element: React.ReactElement<INewsListProps > = React.createElement(
+          NewsList,
+          {
+            title: this.properties.title,
+            global: this.properties.global,
+            newsList: p
+          }
+        );
+        ReactDom.render(element, this.domElement);
+      });
+    } else {
+      const filter = "(PromotedState eq 2) and (FinalApproved eq 1) and (FSObjType eq 0)";
+      const orderField = "FirstPublishedDate";
+      const orderType = false;
+      sp.web.lists.getByTitle("Site Pages").items.filter(filter).orderBy(orderField,orderType).get().then(p => {
+        const element: React.ReactElement<INewsListProps > = React.createElement(
+          NewsList,
+          {
+            title: this.properties.title,
+            global: this.properties.global,
+            newsList: p
+          }
+        );
+        ReactDom.render(element, this.domElement);
       });
     }
-    
-    const element: React.ReactElement<INewsListProps > = React.createElement(
-      NewsList,
-      {
-        title: this.properties.title,
-        global: this.properties.global,
-        newsList: this.listResult
-      }
-    );
-    if(this.listInit){
-      ReactDom.render(element, this.domElement);
-    }
-  }
-
-  private _getListData(query:string, central:boolean): Promise<any> {
-    let host = central ? "https://qualysoftholding.sharepoint.com/sites/intranet" : this.context.pageContext.web.absoluteUrl;
-    return this.context.spHttpClient.get(host + `/_api/web/Lists/GetByTitle('Site Pages')/Items?` + query, SPHttpClient.configurations.v1)
-      .then((response: SPHttpClientResponse) => {
-        return response.json();
-      });
   }
 
   protected onDispose(): void {
@@ -78,6 +74,9 @@ export default class NewsListWebPart extends BaseClientSideWebPart<INewsListWebP
               groupFields: [
                 PropertyPaneTextField('title', {
                   label: strings.TitleFieldLabel
+                }),
+                PropertyPaneToggle('global', {
+                  label: strings.GlobalFieldLabel
                 })
               ]
             }

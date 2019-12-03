@@ -1,3 +1,6 @@
 export interface INewsListState {  
-    isOpen: boolean; 
+    isOpen: boolean;
+    actPage: number;
+    pageSize: number;
+    searchStr: string;
 }

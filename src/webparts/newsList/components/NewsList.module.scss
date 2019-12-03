@@ -32,59 +32,37 @@
   
 
   .newsFeedItems {
-    padding: 10px 0;
+    align-items: center;
+    justify-content: center;
 
     .newsFeedItem {
-      margin: 5px 5px 10px 5px;
-      background-color: #f4f4f4;
-      padding: 0 10px 5px 10px;
-      display: block;
-      text-decoration: none;
-
-      .newsFeedTitle {
-        padding: 10px 0 10px 0;
-        margin: 0;
-
-        span {
-          text-decoration: none;
-          color: "[theme: themePrimary]";
-        }
-      }
-
-      .newsFeedImage {
-        float: left;
-        width: 33%;
-
-        img {
-          width: 100%;
-        }
-      }
-
-      .newsFeedBody {
-        float: right;
-        width: 67%;
-
-        .newsFeedContent {
-          margin: 0 10px 10px 10px;
-          color: #555;
-        }
-      }
-      .clear {
-        clear: both;
-        height: 0;
-        font-size: 0;
-      }
+      width:100%;
+      max-width:100%;
+      padding-right:10px;
+      background-color:#efefef;
+    }
+    .newsFeedItem:hover {
+      background-color:#fff;
     }
 
-    .newsFeedItem:hover {
-      background-color: #e8e8e8;
-      
-      .newsFeedTitle {
-        span {
-          text-decoration: none;
-          color: "[theme: themeDarkAlt]";
-        }
-      }
+    .newsFeedImage {
+      background-size: cover;
+      background-position: center;
+      width: 200px;
+      height: 140px;
+    }
+
+    .title {
+      font-size: 16px;
+      margin: 5px 0 0 0;
+      font-weight:600;
+    }
+    .date {
+      margin-top:5px;
+    }
+    .desc {
+      color: #555;
+      margin-top:5px;
     }
   }
   .toolbar {
@@ -93,7 +71,7 @@
     margin: 5px 0;
 
     .searcBox {
-      width: calc(100% - 90px);
+      width: 100%;
       display: inline-flex;
     }
 
@@ -106,4 +84,8 @@
 
 .panel div[class*="ms-Panel-contentInner"] {
   background-color: #fff;
+}
+.pagination > div {
+  text-align: center;
+  margin:20px auto;
 }

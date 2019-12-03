@@ -6,16 +6,26 @@ import { DefaultButton } from 'office-ui-fabric-react/lib/Button';
 import { Panel } from 'office-ui-fabric-react/lib/Panel';
 import { SearchBox } from 'office-ui-fabric-react/lib/SearchBox';
 import { ChoiceGroup, IChoiceGroupOption } from 'office-ui-fabric-react/lib/ChoiceGroup';
+import { FontWeights } from '@uifabric/styling';
+import Pagination from 'office-ui-fabric-react-pagination';
+import { Card, ICardTokens, ICardSectionStyles, ICardSectionTokens } from '@uifabric/react-cards';
+import {
+  IIconStyles,
+  Stack,
+  IStackTokens,
+  Text,
+  ITextStyles
+} from 'office-ui-fabric-react';
 
 import { INewsListState } from './INewsListState'; 
 
 export default class NewsList extends React.Component<INewsListProps, INewsListState> {
-
+  
   public self = this;
   
   public constructor(props: INewsListProps, state: INewsListState) {
     super(props);
-    this.state = { isOpen: false };
+    this.state = { isOpen: false, searchStr:'', actPage: 1, pageSize: 5 };
   }
 
   public openPane():void {
@@ -27,23 +37,31 @@ export default class NewsList extends React.Component<INewsListProps, INewsListS
   }
   
   private items:any;
+  private filteredItems: any;
   
   public render(): React.ReactElement<INewsListProps> {
 
-    this.items = this.props.newsList.map((item, key) =>
-      <a href={item.FileRef} title={item.Title} target="_blank" className={styles.newsFeedItem}>
-        <h3 className={styles.newsFeedTitle}>
-          <span>{item.Title}</span>
-        </h3>
-        <div className={styles.newsFeedImage}>
-          <img src={item.BannerImageUrl.Url} alt={item.Title}/>
-        </div>
-        <div className={styles.newsFeedBody}>
-          <div className={styles.newsFeedContent}>{item.Description}</div>
-        </div>
-        <div className={styles.clear}></div>
-      </a>
-    );
+    const alertClicked = (url): void => {
+      window.open(url);
+    };
+
+    this.filteredItems = this.props.newsList.filter((item) => {
+      return item.Title.toLowerCase().search(this.state.searchStr.toLowerCase()) !== -1 || (item.Description && item.Description.toLowerCase().search(this.state.searchStr.toLowerCase()) !== -1);
+    });
+
+    this.items = this.filteredItems.map((item, key) => {
+      if(key < this.state.actPage * this.state.pageSize && key >= (this.state.actPage-1) * this.state.pageSize)
+      return <Card horizontal onClick={() => alertClicked(item.FileRef)} tokens={cardTokens} className={ styles.newsFeedItem }>
+        <Card.Item fill>
+          <div className={ styles.newsFeedImage } style={{backgroundImage: `url(${item.BannerImageUrl.Url})`}}></div>
+        </Card.Item>
+        <Card.Section>
+          <Text variant="small" styles={siteTextStyles} className={styles.title}>{key} {item.Title}</Text>
+          <Text variant="small" styles={siteTextStyles} className={styles.date}>{new Date(item.FirstPublishedDate).toLocaleString('hu-HU')}</Text>
+          <Text styles={descriptionTextStyles} className={styles.desc}>{item.Description}</Text>
+        </Card.Section>
+      </Card>
+    });
 
     function _onChangeOrder(ev: React.FormEvent<HTMLInputElement>, option: IChoiceGroupOption): void {
       console.dir(option);
@@ -52,7 +70,42 @@ export default class NewsList extends React.Component<INewsListProps, INewsListS
     function _onChangeSource(ev: React.FormEvent<HTMLInputElement>, option: IChoiceGroupOption): void {
       console.dir(option);
     }
+
+    const siteTextStyles: ITextStyles = {
+      root: {
+        color: '#025F52',
+        fontWeight: FontWeights.semibold
+      }
+    };
+    const descriptionTextStyles: ITextStyles = {
+      root: {
+        color: '#333333',
+        fontWeight: FontWeights.regular
+      }
+    };
+    const helpfulTextStyles: ITextStyles = {
+      root: {
+        color: '#333333',
+        fontWeight: FontWeights.regular
+      }
+    };
+    const iconStyles: IIconStyles = {
+      root: {
+        color: '#0078D4',
+        fontSize: 16,
+        fontWeight: FontWeights.regular
+      }
+    };
+    const footerCardSectionStyles: ICardSectionStyles = {
+      root: {
+        borderLeft: '1px solid #F3F2F1'
+      }
+    };
     
+    const sectionStackTokens: IStackTokens = { childrenGap: 20 };
+    const cardTokens: ICardTokens = { childrenMargin: 12 };
+    const footerCardSectionTokens: ICardSectionTokens = { padding: '0px 0px 0px 12px' };
+    console.info(this.props.newsList);
     return (
       <div className={ styles.newsList }>
         <div className={styles.wptitle}>
@@ -62,17 +115,27 @@ export default class NewsList extends React.Component<INewsListProps, INewsListS
         <div className={styles.toolbar}>
           <SearchBox
             className={styles.searcBox}
-            placeholder="Search"
-            onSearch={newValue => console.log('value is ' + newValue)}
-            onFocus={() => console.log('onFocus called')}
-            onBlur={() => console.log('onBlur called')}
-            onChange={() => console.log('onChange called')}
+            placeholder="Search..."
+            //onSearch={newValue => this.setState({ searchStr: newValue, actPage:1  })}
+            onChange={(value) => this.setState({ searchStr: value, actPage:1 })}
           />
-          <DefaultButton className={styles.settingsButton} text="Filter" onClick={() => this.openPane()} />
         </div>
-        <div className={styles.newsFeedItems}>
-          {this.items}
+        <div>
+          <Stack tokens={sectionStackTokens} className={styles.newsFeedItems}>
+            {this.items}
+          </Stack>
         </div>
+        {this.filteredItems.length > this.state.pageSize ?
+        <div className={ styles.pagination }>
+          <Pagination
+            currentPage={this.state.actPage}
+            totalPages={this.filteredItems.length % this.state.pageSize != 0 ? Math.round(this.filteredItems.length / this.state.pageSize)+1: this.filteredItems.length / this.state.pageSize}
+            hidePreviousAndNextPageLinks={true}
+            hideFirstAndLastPageLinks={true}
+            onChange={(page) => this.setState({ actPage: page })}
+          />
+        </div>
+        : ''}
 
         <Panel
           headerText="News filter"
