@@ -41,17 +41,13 @@ export default class NewsList extends React.Component<INewsListProps, INewsListS
   
   public render(): React.ReactElement<INewsListProps> {
 
-    const alertClicked = (url): void => {
-      window.open(url);
-    };
-
     this.filteredItems = this.props.newsList.filter((item) => {
       return item.Title.toLowerCase().search(this.state.searchStr.toLowerCase()) !== -1 || (item.Description && item.Description.toLowerCase().search(this.state.searchStr.toLowerCase()) !== -1);
     });
 
     this.items = this.filteredItems.map((item, key) => {
       if(key < this.state.actPage * this.state.pageSize && key >= (this.state.actPage-1) * this.state.pageSize)
-      return <Card horizontal onClick={() => alertClicked(item.FileRef)} tokens={cardTokens} className={ styles.newsFeedItem }>
+      return <Card horizontal onClick={() => window.open(item.FileRef)} tokens={cardTokens} className={ styles.newsFeedItem }>
         <Card.Item fill>
           <div className={ styles.newsFeedImage } style={{backgroundImage: `url(${item.BannerImageUrl.Url})`}}></div>
         </Card.Item>

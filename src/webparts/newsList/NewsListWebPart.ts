@@ -35,7 +35,7 @@ export default class NewsListWebPart extends BaseClientSideWebPart<INewsListWebP
     }else {
       web = sp.web;
     }
-    web.lists.getByTitle("Site Pages").items.filter(filter).orderBy(orderField,orderType).get().then(p => {
+    web.lists.getByTitle("Site Pages").items.select('Title','BannerImageUrl','FileRef','FirstPublishedDate','Description').filter(filter).orderBy(orderField,orderType).get().then(p => {
       const element: React.ReactElement<INewsListProps > = React.createElement(
         NewsList,
         {
